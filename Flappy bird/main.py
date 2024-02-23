@@ -5,13 +5,13 @@ import sys
 pygame.init()
 
 # chèn background
-background = pygame.transform.scale2x(pygame.image.load("assets/background-night.png"))  # phóng to lên 2 lần
+background = pygame.transform.scale2x(pygame.image.load("assets/background-day.png"))  # phóng to lên 2 lần
 # chèn sàn
 floor = pygame.transform.scale2x(pygame.image.load("assets/floor.png"))  # phóng to lên 2 lần
 # chèn chim
-bird_mid = pygame.image.load("assets/yellowbird-midflap.png")
-bird_up = pygame.image.load("assets/yellowbird-upflap.png")
-bird_down = pygame.image.load("assets/yellowbird-downflap.png")
+bird_mid = pygame.image.load("assets/redbird-midflap.png")
+bird_up = pygame.image.load("assets/redbird-upflap.png")
+bird_down = pygame.image.load("assets/redbird-downflap.png")
 bird_list = [bird_down, bird_mid, bird_up]
 bird_index = 0
 bird = bird_list[bird_index]
@@ -26,14 +26,14 @@ bird_flap = pygame.USEREVENT + 1
 pygame.time.set_timer(bird_flap, 200)
 # tạo timer cho ống
 spawnpipe_event = pygame.USEREVENT
-pygame.time.set_timer(spawnpipe_event, 1200)  # sau 1.2 giây
+pygame.time.set_timer(spawnpipe_event, 900)  # sau 1.2 giây
 # load font
 game_font = pygame.font.Font("font.TTF", 40)
 
 
 class Player:
     """
-    Class quản lí chim
+    Class quản lí Bird
     """
 
     def __init__(self):
@@ -181,7 +181,6 @@ class App:
 
     def on_execute(self):
         self.on_init()
-
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
