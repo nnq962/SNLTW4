@@ -8,6 +8,7 @@ class Apple:
     """
     Class đại diện cho quả táo
     """
+
     def __init__(self, x=0, y=0, step=40):
         """
         Hàm khởi tạo
@@ -33,7 +34,8 @@ class Player:
     """
     Class Player đại diện cho Rắn
     """
-    def __init__(self, length=3, step=40, direction=0, updatecountmax=4, updatecount=0, score=0):
+
+    def __init__(self, length=3, step=40, direction=0, updatecountmax=4, updatecount=0):
         """
         Hàm khởi tạo
         :param length: độ dài
@@ -41,14 +43,14 @@ class Player:
         :param direction: hướng
         :param updatecountmax: giới hạn update
         :param updatecount: số lần update
-        :param score: Điểm số
         """
         self.updateCount = updatecount
         self.updateCountMax = updatecountmax
         self.direction = direction
         self.length = length
         self.step = step
-        self.score = score
+        self.score = 0
+        self.high_score = 0
 
         # khởi tạo 2 list
         self.x = [0]
@@ -88,6 +90,14 @@ class Player:
                 self.y[0] = self.y[0] + self.step
 
             self.updateCount = 0
+
+    def update_score(self):
+        if self.score > self.high_score:
+            self.high_score = self.score
+        return self.high_score
+
+    def reset_score(self):
+        self.score = 0
 
     def move_right(self):
         self.direction = 0
@@ -130,6 +140,7 @@ class App:
     """
     Giao diện game
     """
+
     def __init__(self, width=880, height=520):
         self.running = True
         self.display_surface = None
@@ -137,6 +148,7 @@ class App:
         self.height = height
         self.snake = Player(length=3)
         self.apple = Apple(4, 4)
+        self.game_active = True
 
     def on_init(self):
         pygame.init()
@@ -171,15 +183,50 @@ class App:
         # Kiểm tra xem rắn có cắn vào bản thân
         for i in range(2, self.snake.length):
             if is_collision(self.snake.x[0], self.snake.y[0], self.snake.x[i], self.snake.y[i]):
-                print()
-                print("====== YOU LOSE ======")
-                print("YOUR SCORES:", self.snake.score)
-                self.running = False
+                self.game_active = False
+
+    def score_display(self):
+        if self.game_active:
+            font = pygame.font.Font(None, 36)  # Tạo đối tượng font
+            text = font.render("Score: " + str(self.snake.score), True, (0, 0, 0))  # Tạo đối tượng văn bản
+            self.display_surface.blit(text, (10, 10))  # Vẽ văn bản tại vị trí (10, 10)
+        else:
+            self.snake.update_score()
+            font = pygame.font.Font(None, 36)  # Tạo đối tượng font
+            text = font.render("PRESS SPACE TO RESTART: ", True, (0, 0, 0))  # Tạo đối tượng văn bản
+            self.display_surface.blit(text, (500, self.height / 2 - 30))  # Vẽ văn bản tại vị trí (x, y)
+            text = font.render("High Score: " + str(self.snake.high_score), True, (0, 0, 0))  # Tạo đối tượng văn bản
+            self.display_surface.blit(text, (500, self.height / 2))  # Vẽ văn bản tại vị trí (x, y)
+
+    def restart_game(self):
+        self.game_active = True
+
+        # khởi lại tạo 2 list
+        self.snake.x = [0]
+        self.snake.y = [0]
+
+        # mở rộng x và y để lưu vị trí rắn
+        for i in range(0, 2000):
+            self.snake.x.append(-100)
+            self.snake.y.append(-100)
+
+        # khởi tạo vị trí đầu tiên
+        self.snake.x[1] = 1 * self.snake.step
+        self.snake.x[2] = 2 * self.snake.step
+
+        # đặt lại hướng
+        self.snake.direction = 0
+
+        # đặt lại độ dài
+        self.snake.length = 3
+
+        self.snake.reset_score()
 
     def on_render(self):
         self.display_surface.fill((255, 255, 255))
-        self.snake.draw(self.display_surface)
-        self.apple.draw(self.display_surface)
+        if self.game_active:
+            self.snake.draw(self.display_surface)
+            self.apple.draw(self.display_surface)
 
         # Tạo lưới ô vuông
         line_color = (200, 200, 200)
@@ -190,9 +237,7 @@ class App:
             pygame.draw.line(self.display_surface, line_color, (0, y), (self.width, y))
 
         # Vẽ điểm số lên màn hình
-        font = pygame.font.Font(None, 36)  # Tạo đối tượng font
-        text = font.render("Score: " + str(self.snake.score), True, (0, 0, 0))  # Tạo đối tượng văn bản
-        self.display_surface.blit(text, (10, 10))  # Vẽ văn bản tại vị trí (10, 10)
+        self.score_display()
 
         # Cập nhật màn hình
         pygame.display.flip()
@@ -223,10 +268,13 @@ class App:
             if keys[K_ESCAPE]:
                 self.running = False
 
+            if keys[K_SPACE] and self.game_active is False:
+                self.restart_game()
+
             self.on_loop()
             self.on_render()
 
-            time.sleep(50.0 / 1000.0)
+            time.sleep(40.0 / 1000.0)
         self.on_cleanup()
 
 
