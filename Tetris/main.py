@@ -32,8 +32,8 @@ class Block:
     def __init__(self, x, y, n):
         self.x = x
         self.y = 0
-        self.type = n
-        self.color = n + 1
+        self.type = random.randint(0, len(shapes) - 1)
+        self.color = random.randint(1, len(shapeColors) - 1)
         self.rotation = 0
 
     def image(self):
